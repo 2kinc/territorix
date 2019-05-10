@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,27 @@
     <link rel="stylesheet" href="style.css">
     <title>Territorix</title>
 </head>
+
 <body>
     <div id="game">
         <table>
             <tbody id="game-tiles"></tbody>
         </table>
     </div>
-    
+    <script src="https://www.gstatic.com/firebasejs/5.9.1/firebase.js"></script>
+    <script> //Firebase Initializing
+        var config = {
+            apiKey: "AIzaSyADD6YWKrzibRMwJNi1FwUR0jcR0GitZPI",
+            authDomain: "k-inc-232222.firebaseapp.com",
+            databaseURL: "https://k-inc-232222.firebaseio.com",
+            projectId: "k-inc-232222",
+            storageBucket: "k-inc-232222.appspot.com",
+            messagingSenderId: "827804821456"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script src="game.js"></script>
 </body>
+
 </html>
