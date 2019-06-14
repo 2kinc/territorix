@@ -1,20 +1,13 @@
 body {
     margin: 0;
+    overflow: hidden;
 }
 
-.game-tile {
-    width: 100px;
-    height: 100px;
-    max-width: 100px;
-    max-height: 100px;
-    overflow: hidden;
-    text-align: center;
+#game {
     margin: 0;
     padding: 0;
-    border: none;
-    display: inline-block;
 }
 
-#game-table {
-    table-layout: fixed;
+#game > canvas {
+    margin: 0;
 }

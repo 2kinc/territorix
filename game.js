@@ -1,13 +1,16 @@
 function Tile(name, color, description) {
+    this.name = name;
     this.color = color;
     this.description = description;
-    this.name = name;
 }
 
-var tiles = {
-    grass: new Tile('Grass', '#44ee44', 'A tidy grass tile.'),
-    water: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.')
+const TILE = {
+    0: new Tile('Grass', '#44ee44', 'A tidy grass tile.'),
+    1: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.')
 }
+
+var world = new World(document.querySelector('#game'), 'white', innerWidth, innerHeight, 0, 0, { x: 0, y: 0 });
+world.start();
 
 function getTileId(coords) {
     return 't_' + tileIdSign(coords.x) + '_' + tileIdSign(coords.y);
@@ -17,43 +20,63 @@ function tileIdSign(n) {
     return String(Math.abs(n)) + (n < 0 ? "n" : "");
 }
 
-function Renderer(el, ref) {
-    var that = this;
-    this.el = $(el);
-    this.ref = ref;
-    this.generate = function (rows, cols, start_x, start_y) {
-        for (var y = (start_y || 0); y < rows + (start_y || 0); y++) {
-            var tr = document.createElement('tr');
-            that.el.append(tr);
-            for (var x = (start_x || 0); x < cols + (start_x || 0); x++) {
-                var td = document.createElement('td');
-                td.id = getTileId({ x: x, y: y });
-                td.className = 'game-tile';
-                tr.appendChild(td);
-            }
-        }
-    }
-    this.initialize = function () {
-        that.ref.child('tiles').on("child_added", function (snap) {
-            var tile = snap.val();
-            var coords = snap.key.split(',');
-            coords = {
-                x: Number(coords[0]),
-                y: Number(coords[1])
-            };
-            var td = document.getElementById(getTileId(coords));
-            var info = tiles[tile.type];
-            td.innerText = info.name;
-            td.style.background = info.color;
-            td.title = info.description;
-        });
-    };
-}
-
 var app = firebase;
 var db = app.database();
 var dbRef = db.ref('territorix').child('main-server');
+var input = {
+    keys: {},
+    clientX: 0,
+    clientY: 0,
+    mouseDown: false,
+    keyListener: function (e) {
+        var bool = (e.type == 'keydown');
+        input.keys[e.key.toLowerCase()] = bool;
+    },
+    mouseListener: function (e) {
+        if (e.type == 'mousemove') {
+            input.clientX = e.clientX;
+            input.clientY = e.clientY;
+        }
+        else if (e.type == 'mousedown') {
+            input.mouseDown = true;
+        }
+        else if (e.type == 'mouseup') {
+            input.mouseDown = false;
+        }
+    }
+};
 
-var renderer = new Renderer('#game-tiles', dbRef);
-renderer.generate(10, 10);
-renderer.initialize();
+document.onkeydown = input.keyListener;
+document.onkeyup = input.keyListener;
+document.onmousedown = input.mouseListener;
+document.onmouseup = input.mouseListener;
+document.onmousemove = input.mouseListener;
+
+dbRef.child('tiles').on("child_added", function (snap) {
+    var tile = snap.val();
+    var coords = snap.key.split(',');
+    coords = {
+        x: Number(coords[0]),
+        y: Number(coords[1])
+    };
+    world.set(new world.Rectangle(snap.key, coords.x * 50, coords.y * 50, 50, 50, TILE[tile.type].color));
+});
+
+world.update = function () {
+    if (input.keys['w'] || input.keys['arrowup'])
+        world.cam.y -= 10;
+    if (input.keys['a'] || input.keys['arrowleft'])
+        world.cam.x -= 10;
+    if (input.keys['s'] || input.keys['arrowdown'])
+        world.cam.y += 10;
+    if (input.keys['d'] || input.keys['arrowright'])
+        world.cam.x += 10;
+    /*if (input.clientY < 70)
+        world.cam.y -= 10;
+    if (input.clientX < 70)
+        world.cam.x -= 10;
+    if (input.clientY > innerHeight - 70)
+        world.cam.y += 10;
+    if (input.clientX > innerWidth - 70)
+        world.cam.x += 10;*/
+}
