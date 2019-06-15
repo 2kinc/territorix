@@ -6,14 +6,15 @@ function Tile(name, color, description) {
 
 const TILE = {
     0: new Tile('Grass', '#44ee44', 'A tidy grass tile.'),
-    1: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.')
+    1: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.'),
+    2: new Tile('Sand', '#fff176', 'sand.')
 }
 
 var world = new World(document.querySelector('#game'), 'white', innerWidth, innerHeight, 0, 0, { x: 0, y: 0 });
 world.start();
 
 function getTileId(coords) {
-    return 't_' + tileIdSign(coords.x) + '_' + tileIdSign(coords.y);
+    return tileIdSign(coords.x) + ',' + tileIdSign(coords.y);
 }
 
 function tileIdSign(n) {
@@ -28,20 +29,28 @@ var input = {
     clientX: 0,
     clientY: 0,
     mouseDown: false,
+    mouseLeft: false,
     keyListener: function (e) {
         var bool = (e.type == 'keydown');
         input.keys[e.key.toLowerCase()] = bool;
     },
     mouseListener: function (e) {
+        input.mouseLeft = false;
         if (e.type == 'mousemove') {
             input.clientX = e.clientX;
             input.clientY = e.clientY;
+            input.mouseX = e.clientX + world.cam.x;
+            input.mouseY = e.clientY + world.cam.y;
         }
         else if (e.type == 'mousedown') {
             input.mouseDown = true;
         }
         else if (e.type == 'mouseup') {
             input.mouseDown = false;
+        }
+        else if (e.type == 'mouseleave') {
+            input.mouseDown = false;
+            input.mouseLeft = true;
         }
     }
 };
@@ -51,6 +60,7 @@ document.onkeyup = input.keyListener;
 document.onmousedown = input.mouseListener;
 document.onmouseup = input.mouseListener;
 document.onmousemove = input.mouseListener;
+document.onmouseleave = input.mouseListener;
 
 dbRef.child('tiles').on("child_added", function (snap) {
     var tile = snap.val();
@@ -59,7 +69,7 @@ dbRef.child('tiles').on("child_added", function (snap) {
         x: Number(coords[0]),
         y: Number(coords[1])
     };
-    world.set(new world.Rectangle(snap.key, coords.x * 50, coords.y * 50, 50, 50, TILE[tile.type].color));
+    world.set(new world.Rectangle(snap.key, coords.x * 75, coords.y * 75, 75, 75, TILE[tile.type].color));
 });
 
 world.update = function () {
@@ -79,4 +89,20 @@ world.update = function () {
         world.cam.y += 10;
     if (input.clientX > innerWidth - 70)
         world.cam.x += 10;*/
+    if (input.mouseDown && !input.mouseLeft) {
+        var x = Math.floor(input.mouseX / 75);
+        var y = Math.floor(input.mouseY / 75);
+        var id = getTileId({ x, y });
+        if (!world.get(id)) {
+            var noiseValue = noise.simplex2(x / 69, y / 69);
+            var tile = 0;
+            if (noiseValue >= 0.3)
+                tile = 0;
+            else if (noiseValue >= -0.3)
+                tile = 1;
+            else if (noiseValue >= -1)
+                tile = 2;
+            world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
+        }
+    }
 }
