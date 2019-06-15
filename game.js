@@ -39,8 +39,8 @@ var input = {
         if (e.type == 'mousemove') {
             input.clientX = e.clientX;
             input.clientY = e.clientY;
-            input.mouseX = e.clientX + world.cam.x;
-            input.mouseY = e.clientY + world.cam.y;
+            input.mouseX = e.clientX + world.cam.x / world.cam.zoom; //work in progress, zoom is messed up
+            input.mouseY = e.clientY + world.cam.y / world.cam.zoom; //without zoom it is still fine
         }
         else if (e.type == 'mousedown') {
             input.mouseDown = true;
@@ -81,6 +81,10 @@ world.update = function () {
         world.cam.y += 10;
     if (input.keys['d'] || input.keys['arrowright'])
         world.cam.x += 10;
+    if (input.keys['q'] && world.cam.zoom > 0.15)
+        world.cam.zoom -= 0.03;
+    if (input.keys['e'] && world.cam.zoom < 5)
+        world.cam.zoom += 0.03;
     /*if (input.clientY < 70)
         world.cam.y -= 10;
     if (input.clientX < 70)

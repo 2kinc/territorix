@@ -10,4 +10,5 @@ body {
 
 #game > canvas {
     margin: 0;
+    image-rendering: pixelated;
 }
