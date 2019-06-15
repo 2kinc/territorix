@@ -94,7 +94,7 @@ world.update = function () {
         var y = Math.floor(input.mouseY / 75);
         var id = getTileId({ x, y });
         if (!world.get(id)) {
-            var noiseValue = noise.simplex2(x / 69, y / 69);
+            var noiseValue = noise.simplex2(x / 25, y / 25);
             var tile = 0;
             if (noiseValue >= 0.3)
                 tile = 0;
