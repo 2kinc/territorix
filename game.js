@@ -1,11 +1,11 @@
-function Tile(name, color, description) {
+function Tile(name, src, description) {
     this.name = name;
-    this.color = color;
+    this.src = src;
     this.description = description;
 }
 
 const TILE = {
-    0: new Tile('Grass', '#44ee44', 'A tidy grass tile.'),
+    0: new Tile('Grass', 'textures/grass.png', 'A tidy grass tile.'),
     1: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.'),
     2: new Tile('Sand', '#fff176', 'sand.')
 }
@@ -70,7 +70,7 @@ dbRef.child('tiles').on("child_added", function (snap) {
         x: Number(coords[0]),
         y: Number(coords[1])
     };
-    world.set(new world.Rectangle(snap.key, coords.x * 75, coords.y * 75, 75, 75, TILE[tile.type].color));
+    world.set(new world.Image(snap.key, coords.x * 75, coords.y * 75, 75, 75, TILE[tile.type].src));
 });
 
 world.update = function () {
@@ -94,7 +94,7 @@ world.update = function () {
                 tile = 1;
             else if (noiseValue >= -1)
                 tile = 2;
-            world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
+            world.set(new world.Image(id, x * 75, y * 75, 75, 75, TILE[tile].src));
             keys[id] = true;
         }
     }
