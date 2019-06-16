@@ -75,27 +75,27 @@ dbRef.child('tiles').on("child_added", function (snap) {
 
 world.update = function () {
     var topLeft = {
-        x: Math.floor(world.cam.x / 75),
-        y: Math.floor(world.cam.y / 75)
+        x: Math.floor(world.cam.x / 75) - 1,
+        y: Math.floor(world.cam.y / 75) - 1
     };
     var bottomRight = {
-        x: Math.ceil((world.cam.x + world.width) / world.cam.zoom / 75),
-        y: Math.ceil((world.cam.y + world.height) / world.cam.zoom / 75)
+        x: Math.ceil((world.cam.x + (world.width / world.cam.zoom)) / 75) + 1,
+        y: Math.ceil((world.cam.y + (world.height / world.cam.zoom)) / 75) + 1
     };
+    var keys = {};
     for (var x = topLeft.x; x < bottomRight.x; x++) {
         for (var y = topLeft.y; y < bottomRight.y; y++) {
             var id = getTileId({ x, y });
-            if (!world.get(id)) {
-                var noiseValue = noise.simplex2(x / 25, y / 25);
-                var tile = 0;
-                if (noiseValue >= 0.3)
-                    tile = 0;
-                else if (noiseValue >= -0.3)
-                    tile = 1;
-                else if (noiseValue >= -1)
-                    tile = 2;
-                world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
-            }
+            var noiseValue = noise.simplex2(x / 25, y / 25);
+            var tile = 0;
+            if (noiseValue >= 0.5)
+                tile = 0;
+            else if (noiseValue >= -0.4)
+                tile = 1;
+            else if (noiseValue >= -1)
+                tile = 2;
+            world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
+            keys[id] = true;
         }
     }
     var offset = 10 / world.cam.zoom;
@@ -107,8 +107,13 @@ world.update = function () {
         world.cam.y += offset;
     if (input.keys['d'] || input.keys['arrowright'])
         world.cam.x += offset;
-    if (input.keys['q'] && world.cam.zoom > 0.4)
+    if (input.keys['q'] && world.cam.zoom > 0.3)
         world.cam.zoom -= 0.03;
     if (input.keys['e'] && world.cam.zoom < 5)
         world.cam.zoom += 0.03;
+    world.objects.forEach(function (obj) {
+        if (!keys[obj.name]) {
+            world.objects.delete(obj.name);
+        }
+    });
 }
