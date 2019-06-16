@@ -24,6 +24,7 @@ function tileIdSign(n) {
 var app = firebase;
 var db = app.database();
 var dbRef = db.ref('territorix').child('main-server');
+noise.seed(Math.random());
 var input = {
     keys: {},
     clientX: 0,
@@ -73,40 +74,41 @@ dbRef.child('tiles').on("child_added", function (snap) {
 });
 
 world.update = function () {
+    var topLeft = {
+        x: Math.floor(world.cam.x / 75),
+        y: Math.floor(world.cam.y / 75)
+    };
+    var bottomRight = {
+        x: Math.ceil((world.cam.x + world.width) / world.cam.zoom / 75),
+        y: Math.ceil((world.cam.y + world.height) / world.cam.zoom / 75)
+    };
+    for (var x = topLeft.x; x < bottomRight.x; x++) {
+        for (var y = topLeft.y; y < bottomRight.y; y++) {
+            var id = getTileId({ x, y });
+            if (!world.get(id)) {
+                var noiseValue = noise.simplex2(x / 25, y / 25);
+                var tile = 0;
+                if (noiseValue >= 0.3)
+                    tile = 0;
+                else if (noiseValue >= -0.3)
+                    tile = 1;
+                else if (noiseValue >= -1)
+                    tile = 2;
+                world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
+            }
+        }
+    }
+    var offset = 10 / world.cam.zoom;
     if (input.keys['w'] || input.keys['arrowup'])
-        world.cam.y -= 10;
+        world.cam.y -= offset;
     if (input.keys['a'] || input.keys['arrowleft'])
-        world.cam.x -= 10;
+        world.cam.x -= offset;
     if (input.keys['s'] || input.keys['arrowdown'])
-        world.cam.y += 10;
+        world.cam.y += offset;
     if (input.keys['d'] || input.keys['arrowright'])
-        world.cam.x += 10;
-    if (input.keys['q'] && world.cam.zoom > 0.15)
+        world.cam.x += offset;
+    if (input.keys['q'] && world.cam.zoom > 0.4)
         world.cam.zoom -= 0.03;
     if (input.keys['e'] && world.cam.zoom < 5)
         world.cam.zoom += 0.03;
-    /*if (input.clientY < 70)
-        world.cam.y -= 10;
-    if (input.clientX < 70)
-        world.cam.x -= 10;
-    if (input.clientY > innerHeight - 70)
-        world.cam.y += 10;
-    if (input.clientX > innerWidth - 70)
-        world.cam.x += 10;*/
-    if (input.mouseDown && !input.mouseLeft) {
-        var x = Math.floor(input.mouseX / 75);
-        var y = Math.floor(input.mouseY / 75);
-        var id = getTileId({ x, y });
-        if (!world.get(id)) {
-            var noiseValue = noise.simplex2(x / 25, y / 25);
-            var tile = 0;
-            if (noiseValue >= 0.3)
-                tile = 0;
-            else if (noiseValue >= -0.3)
-                tile = 1;
-            else if (noiseValue >= -1)
-                tile = 2;
-            world.set(new world.Rectangle(id, x * 75, y * 75, 75, 75, TILE[tile].color));
-        }
-    }
 }
