@@ -72,7 +72,7 @@ dbRef.child('tiles').on("child_added", function (snap) {
     };
     world.set(new world.Image(snap.key, coords.x * 75, coords.y * 75, 75, 75, TILE[tile.type].src));
 });
-
+world.context.imageSmoothingEnabled= false
 world.update = function () {
     var topLeft = {
         x: Math.floor(world.cam.x / 75) - 1,
@@ -85,7 +85,7 @@ world.update = function () {
     var keys = {};
     for (var x = topLeft.x; x < bottomRight.x; x++) {
         for (var y = topLeft.y; y < bottomRight.y; y++) {
-            var id = getTileId({ x, y });
+            var id = getTileId({x,y});
             var noiseValue = noise.simplex2(x / 25, y / 25);
             var tile = 0;
             if (noiseValue >= 0.5)
