@@ -5,9 +5,9 @@ function Tile(name, src, description) {
 }
 
 const TILE = {
-    0: new Tile('Grass', 'textures/grass.png', 'A tidy grass tile.'),
-    1: new Tile('Water', '#4488ff', 'A water tile. Need a boat to cross.'),
-    2: new Tile('Sand', '#fff176', 'sand.')
+    0: new Tile('Grass', 'textures/Grass.png', 'A tidy grass tile.'),
+    1: new Tile('Water', 'textures/Water.png', 'A water tile. Need a boat to cross.'),
+    2: new Tile('Sand', 'textures/Sand.png', 'sand.')
 }
 
 var world = new World(document.querySelector('#game'), 'white', innerWidth, innerHeight, 0, 0, { x: 0, y: 0 });
